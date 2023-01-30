@@ -6,5 +6,5 @@ from .database import Base
 class logChannel(Base):
     __tablename__ = "test"
 
-    guild_id = Column(Integer, primary_key=True, index=True)
-    channel_id = Column(Integer, index=True)
+    guild_id = Column(String, primary_key=True, index=True)
+    channel_id = Column(String, index=True)
