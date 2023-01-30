@@ -16,18 +16,25 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/log/channel/create/", response_model=schemas.logChannel)
-def logChannelAPI(channel_ids: schemas.logChannel, db: Session = Depends(get_db)):
-    return crud.create_log_table(db, channel_ids)
-
-@app.get("/log/channel/select/{guild_id}", response_model=schemas.logChannel)
-def read_user(guild_id: str, db: Session = Depends(get_db)):
-    data = crud.get_guild_id(db, guild_id)
+@app.post("/setlogchannel/", response_model=schemas.logChannel)
+def set_log_channel(jSON: schemas.logChannel, db: Session = Depends(get_db)):
+    data = crud.get_guild_id(db, jSON.guild_id)
+    # if db is not empty -> create new
     if data is None:
-        raise HTTPException(status_code=409, detail="guild id does not exist")
+        check = crud.create_log_table(db, jSON)
+        if check is None:
+            raise HTTPException(status_code=409, detail="dbCreateFailed")
+        else:
+            raise HTTPException(status_code=201, detail="dbCreateSuccess")
+        
+    # if channel id is same -> do nothing
+    elif data.channel_id == jSON.channel_id:
+        raise HTTPException(status_code=409, detail="sameChannelId")
+    
+    # if channel id is not same -> update
     else:
-        return {"guild_id": data.guild_id, "channel_id": data.channel_id}
-
-@app.put("/log/channel/update/", response_model=schemas.logChannel)
-def update_channelId(channel_ids: schemas.logChannel, db: Session = Depends(get_db)):
-    return crud.update_channel_id(db, channel_ids)
+        check = crud.update_channel_id(db, jSON)
+        if check is None:
+            raise HTTPException(status_code=409, detail="dbUpdateFailed")
+        else:
+            raise HTTPException(status_code=201, detail="dbUpdateSuccess")
