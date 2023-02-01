@@ -16,7 +16,8 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/setlogchannel/", response_model=schemas.logChannel)
+#SET LOG CHANNEL
+@app.post("/logchannel/set", response_model=schemas.logChannel)
 def set_log_channel(jSON: schemas.logChannel, db: Session = Depends(get_db)):
     data = crud.get_guild_id(db, jSON.guild_id)
     # if db is not empty -> create new
@@ -38,3 +39,12 @@ def set_log_channel(jSON: schemas.logChannel, db: Session = Depends(get_db)):
             raise HTTPException(status_code=409, detail="dbUpdateFailed")
         else:
             raise HTTPException(status_code=201, detail="dbUpdateSuccess")
+
+#GET LOG CHANNEL ID
+@app.get("/logchannel/get/{guild_id}", response_model=Union[schemas.logChannel, None])
+def get_channel_id(guild_id: str, db: Session = Depends(get_db)):
+    data = crud.get_guild_id(db, guild_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="dbNotFound")
+    else:
+        return data
