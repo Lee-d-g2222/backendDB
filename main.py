@@ -27,7 +27,7 @@ def set_log_channel(jSON: schemas.logChannel, db: Session = Depends(get_db)):
             raise HTTPException(status_code=409, detail="dbCreateFailed")
         else:
             raise HTTPException(status_code=201, detail="dbCreateSuccess")
-        
+    
     # if channel id is same -> do nothing
     elif data.channel_id == jSON.channel_id:
         raise HTTPException(status_code=409, detail="sameChannelId")
